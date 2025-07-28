@@ -1,13 +1,27 @@
+import React from "react";
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import Router from "./router/router";
+import "./App.css";
 
-import './App.css'
+const theme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
 
-function App() {
-
+const App: React.FC = () => {
   return (
-    <>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <AuthProvider>
+          <Router />
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+};
 
-    </>
-  )
-}
-
-export default App
+export default App;
