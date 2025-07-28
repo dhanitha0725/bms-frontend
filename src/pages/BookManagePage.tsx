@@ -11,7 +11,12 @@ import {
   CircularProgress,
   Snackbar,
 } from "@mui/material";
-import { useNavigate, useParams, Link as RouterLink, useLocation } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  Link as RouterLink,
+  useLocation,
+} from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BookForm from "../features/book/BookForm";
 import { bookApi } from "../api/bookApi";
@@ -22,7 +27,7 @@ const BookManagePage: React.FC = () => {
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get book data from navigation state if available
   const bookFromState = location.state?.bookData as Book | undefined;
 
@@ -150,11 +155,18 @@ const BookManagePage: React.FC = () => {
             </Typography>
           </Breadcrumbs>
 
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              mb: 2,
+            }}
+          >
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={handleCancel}
-              sx={{ mr: 2 }}
+              sx={{ mb: 2 }}
             >
               Back to Books
             </Button>
@@ -188,7 +200,7 @@ const BookManagePage: React.FC = () => {
                 initialData={book || undefined}
                 title={isEditMode ? "Edit Book" : "Add New Book"}
                 renderAsDialog={false}
-                apiError={apiError}
+                apiError={apiError || undefined}
                 key={book?.id || "new-book"}
               />
             </Box>

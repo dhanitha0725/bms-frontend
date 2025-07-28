@@ -28,7 +28,7 @@ const BookPage: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error" | "info" | "warning",
   });
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -91,8 +91,8 @@ const BookPage: React.FC = () => {
   };
 
   const handleLogout = () => {
-    logout(); 
-    navigate("/"); 
+    logout();
+    navigate("/");
     setSnackbar({
       open: true,
       message: "You have been successfully logged out",
@@ -118,9 +118,6 @@ const BookPage: React.FC = () => {
           <Box>
             <Typography variant="h4" component="h1" gutterBottom>
               Book Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Welcome, {user?.username}! Manage your book collection here.
             </Typography>
           </Box>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
