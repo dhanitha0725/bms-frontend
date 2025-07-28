@@ -37,7 +37,10 @@ api.interceptors.response.use(
     // Handle unauthorized errors (401)
     if (error.response?.status === 401 && !originalRequest._retry) {
       removeToken();
-      window.location.href = '/login'; 
+      
+      // Dispatch an event instead of direct redirection
+      window.dispatchEvent(new Event('auth:unauthorized'));
+      
       return Promise.reject(error);
     }
 
@@ -59,6 +62,21 @@ export const authService = {
     return response.data;
   },
 
+  register: async (username: string, password: string) => {
+    try {
+      const response = await api.post('/auth/register', {
+        username,
+        password
+      });
+      
+      return response.data;
+    } catch (error) {
+      alert("Registration failed. Please try again.");
+      console.error("Registration error details:", error);
+      throw error;
+    }
+  },
+  
   logout: () => {
     removeToken();
   },

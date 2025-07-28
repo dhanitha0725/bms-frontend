@@ -24,9 +24,9 @@ interface User {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  login: (username: string, password: string) => Promise<boolean>; 
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  checkAuth: () => void;
+  checkAuth: () => Promise<boolean>;
 }
 
 // Create the AuthContext
@@ -62,14 +62,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await authService.login(username, password);
 
         if (response.token) {
+          // Ensure token is stored properly
           localStorage.setItem("authToken", response.token);
 
-          const user = extractUserFromToken(response.token);
-          if (!user) return false;
+          // Verify token can be decoded before proceeding
+          try {
+            const user = extractUserFromToken(response.token);
+            if (!user) return false;
 
-          setUser(user);
-          setIsAuthenticated(true);
-          return true;
+            setUser(user);
+            setIsAuthenticated(true);
+            return true;
+          } catch (tokenError) {
+            console.error("Token validation error:", tokenError);
+            return false;
+          }
         }
 
         return false;
@@ -89,33 +96,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Function to check authentication status
-  const checkAuth = useCallback((): void => {
+  const checkAuth = useCallback(async (): Promise<boolean> => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
       setIsAuthenticated(false);
       setUser(null);
-      return;
+      return false;
     }
 
     try {
       // Check if token is expired or invalid
       if (isTokenExpired(token)) {
+        console.log("Token is expired, logging out");
         logout();
-        return;
+        return false;
       }
 
       const user = extractUserFromToken(token);
       if (!user) {
+        console.log("Could not extract user from token, logging out");
         logout();
-        return;
+        return false;
       }
 
+      // Set authentication state
       setUser(user);
       setIsAuthenticated(true);
+      return true;
     } catch (error) {
       console.error("Authentication check failed:", error);
       logout();
+      return false;
     }
   }, [logout]);
 
@@ -130,9 +142,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
 
+    // Listen for unauthorized events from API interceptor
+    const handleUnauthorized = () => {
+      logout();
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [checkAuth]);
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
+  }, [checkAuth, logout]);
 
   const value: AuthContextType = {
     isAuthenticated,
