@@ -70,9 +70,16 @@ export const authService = {
       });
       
       return response.data;
-    } catch (error) {
-      alert("Registration failed. Please try again.");
+    } catch (error: any) {
       console.error("Registration error details:", error);
+      
+      // Properly structure the error to be handled by the calling component
+      if (error.response?.data && typeof error.response.data === 'string') {
+        // Handle direct string error messages from the backend
+        throw new Error(error.response.data);
+      }
+      
+      // If it's not a direct string message, let the caller handle it
       throw error;
     }
   },
